@@ -327,10 +327,7 @@ class Util {
 			if(is_resource($handle)) {
 				while (false !== ($file = readdir($handle))) {
 
-					if (
-						$file !== "."
-						&& $file !== ".."
-					) {
+					if ($file !== "." && $file !== "..") {
 
 						$filePath = $directory . '/' . $this->view->getRelativePath('/' . $file);
 						$relPath = \OCA\Encryption\Helper::stripUserFilesPath($filePath);
@@ -357,10 +354,14 @@ class Util {
 							// NOTE: This is inefficient;
 							// scanning every file like this
 							// will eat server resources :(
-							if (
-								Keymanager::getFileKey($this->view, $this, $relPath)
-								&& $isEncryptedPath
-							) {
+							if ($isEncryptedPath) {
+
+								$fileKey = Keymanager::getFileKey($this->view, $this, $relPath);
+								$shareKey = Keymanager::getShareKey($this->view, $this->userId, $this, $relPath);
+								// if file is encrypted but now file key is available, throw exception
+								if ($fileKey === false || $shareKey === false) {
+									throw new \Exception('No keys available to decrypt the file: ' . $filePath);
+								}
 
 								$found['encrypted'][] = array(
 									'name' => $file,
