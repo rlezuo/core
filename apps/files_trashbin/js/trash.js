@@ -38,17 +38,19 @@ $(document).ready(function() {
 				function(result) {
 					var name;
 					for (var i = 0; i < result.data.success.length; i++) {
-						name = getDeletedFileName(result.data.success[i].filename);
+						var file = result.data.success[i];
+						name = getDeletedFileName(file.filename);
 						if (!dirListing) {
-							name += '.d' + result.data.success[i].timestamp;
+							name += '.d' + file.timestamp;
 						}
-						FileList.remove(name, {updateSummary: false});
+						var $el = FileList.remove(name, {updateSummary: false});
+						FileList.fileSummary.remove({type: $el.attr('data-type'), size: $el.attr('data-size')});
 					}
 					if (result.status !== 'success') {
 						OC.dialogs.alert(result.data.message, t('core', 'Error'));
 					}
 					enableActions();
-					FileList.updateFileSummary();
+					FileList.fileSummary.update();
 					FileList.updateEmptyContent();
 				}
 			);
@@ -78,12 +80,13 @@ $(document).ready(function() {
 						name += '.d' + result.data.success[i].timestamp;
 					}
 					FileList.remove(name, {updateSummary: false});
+					FileList.fileSummary.remove({type: $el.attr('data-type'), size: $el.attr('data-size')});
 				}
 				if (result.status !== 'success') {
 					OC.dialogs.alert(result.data.message, t('core', 'Error'));
 				}
 				enableActions();
-				FileList.updateFileSummary();
+				FileList.fileSummary.update();
 				FileList.updateEmptyContent();
 			}
 		);
